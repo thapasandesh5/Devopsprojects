@@ -1,0 +1,78 @@
+resource "aws_vpc" "vpc" {
+  cidr_block       = "10.0.0.0/21"
+  instance_tenancy = "default"
+  enable_dns_hostnames = true
+  assign_generated_ipv6_cidr_block = true
+  
+
+  tags = {
+    Name = "Terraform VPC"
+  }
+}
+
+resource "aws_internet_gateway" "gateway" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    name = "terragateway"
+  }
+  
+  
+}
+
+resource "aws_subnet" "public-subnet" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "10.0.0.0/24"
+  
+
+  tags = {
+    "name" = "terrasubnetpublic"
+  }
+  
+}
+
+resource "aws_route_table" "route-table" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "10.0.0.0/21"
+    gateway_id = aws_internet_gateway.gateway.id
+  }
+
+  tags = {
+    Name = "terraformroutetable"
+  }
+}
+
+resource "aws_route_table_association" "subnet-route-table" {
+  subnet_id = aws_subnet.public-subnet.id
+  route_table_id = aws_route_table.route-table.id
+  
+}
+
+resource "aws_subnet" "private-subnett" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "10.1.10.0/23"
+ 
+  
+
+  tags = {
+    "name" = "terrasubnetprivate"
+  }
+  
+}
+
+resource "aws_eip" "nat_eip" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.gateway]
+}
+
+/* NAT */
+resource "aws_nat_gateway" "nat" {
+  allocation_id = "${aws_eip.nat_eip.id}"
+  subnet_id     = "${element(aws_subnet.public-subnet.*.id, 0)}"
+  depends_on    = [aws_internet_gateway.gateway]
+  tags = {
+    Name        = "nat"
+  }
+}
