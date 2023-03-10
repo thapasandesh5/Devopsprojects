@@ -1,0 +1,40 @@
+resource "aws_instance" "jenkins_server" {
+  ami             = "ami-0cff7528ff583bf9a"
+  instance_type   = "t2.micro"
+  key_name = "terraform"
+  security_groups = ["terraform"]
+  user_data = file("jenkin.sh")
+
+  tags = {
+    Name = "Jenkins_server-terraform"
+  }
+}
+  resource "aws_security_group" "default" {
+	tags = {
+	type = "jenkins-test-security-group"
+}
+}
+resource "aws_instance" "tomcatt_server" {
+  ami             = "ami-0cff7528ff583bf9a"
+  instance_type   = "t2.micro"
+  key_name = "terraform"
+  security_groups = ["default"]
+  user_data = file("tomcatt.sh")
+
+  tags = {
+    Name = "tomcattt_server-terraform"
+  }
+}
+
+resource "aws_instance" "docker_server" {
+  ami             = "ami-0cff7528ff583bf9a"
+  instance_type   = "t2.micro"
+  key_name = "terraform"
+  security_groups = ["terraform"]
+  user_data = file("docker.sh")
+
+  tags = {
+    Name = "docker_server-terraform"
+  }
+}
+
