@@ -1,0 +1,28 @@
+
+resource "aws_instance" "ansiblemanage_server" {
+  ami             = "ami-0cff7528ff583bf9a"
+  instance_type   = "t2.micro"
+  key_name = "terraform"
+  security_groups = ["terraform"]
+
+  tags = {
+    Name = "ansible_manage-terraform"
+  }
+}
+
+resource "aws_instance" "AnsibleCN_Server" {
+  ami             = "ami-0cff7528ff583bf9a"
+  instance_type   = "t2.micro"
+  key_name = "terraform"
+  security_groups = ["terraform"]
+  user_data = file("ansibleee.sh")
+
+  tags = {
+    Name = "ccontrol_Node-Terraform"
+  }
+}
+
+#!/bin/bash
+
+sudo yum update -y
+sudo amazon-linux-extras install ansible2
